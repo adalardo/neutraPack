@@ -1,0 +1,9 @@
+Package: neutraPack
+Type: Package
+Title: Neutral model simulation
+Version: 0.01
+Date: 2015-11-13
+Author: Alexandre Adalardo, Luisa Novara and Paulo Inacio Prado
+Maintainer: <luisanovara@gmail.com>
+Description: Random simulation 
+License: What license is it under?
