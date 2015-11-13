@@ -28,8 +28,10 @@
 #            µ = xi
 #            sd = dp 
 #
-simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, ciclo=1e6, step=100)
+simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.freq=NULL, dist.int=NULL, ciclo=1e6, step=100)
 {
+  #dist.freq e um vetor com as posicoes dos ciclos que ha disturbio
+  #dist.int e um vetor com a proporcao de mortes no ciclo de disturbio, se e um so valor aplica para todos
   t0=proc.time()[[3]]
   ## Tamanho da comunidade
   J <- S*j
@@ -64,11 +66,28 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, ciclo=1e6, step=100)
   ##Aqui comecam as simulacoes
   for(i in 2:(1+ciclo/step))
   {
-    n.mortes <- 0
+      n.mortes <- 0
+    ## dead based on probability   
     for(a in 1:step) 
     {
-      ## Sorteio dos que morrerao
-      morte=rbinom(J, 1, prob=p.death)
+        ## Sorteio dos que morrerao
+        morte=rbinom(J, 1, prob=p.death)
+        if(sum(dist.freq==i)>0)
+            {
+                vivos <- which(morte==0)
+                nvivos <- length(vivos)
+                if(length(dist.int)>1)
+                    {
+                        posdist <- which(dist.freq==i)
+                        ndist <- round(nvivos* dist.int[posdist])
+                    }
+                if(length(dist.int)==1)
+                    {
+                        ndist <- nvivos* dist.int
+                    }
+                posmort <- sample(vivos, ndist)
+                morte[posmort] <- 1
+            }
       ##Total de mortos, que e armazenado em n.dead
       D=sum(morte)
       n.mortes <- n.mortes+D
