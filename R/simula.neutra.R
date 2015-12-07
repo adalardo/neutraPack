@@ -83,7 +83,7 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
                     }
                 if(length(dist.int)==1)
                     {
-                        ndist <- nvivos* dist.int
+                        ndist <- round(nvivos* dist.int)
                     }
                 posmort <- sample(vivos, ndist)
                 morte[posmort] <- 1
