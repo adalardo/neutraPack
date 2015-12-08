@@ -40,6 +40,10 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   {
     stop("\n\tO potencial reprodutivo (X) precisa ser multiplo do tamanho da comunidade (J). Tente novamente!\n\n")
   } 
+  if(sum(0<=dist.pos & dist.pos<=ciclo)<length(dist.pos)) ## verifica se ha disturbio programado para ciclo inexistente
+  {
+    stop("\n\tA posição dos eventos de distúrbio (dist.pos) precisa ser condizente com o número de ciclos a serem rodados (ciclo). Tente novamente!\n\n")
+  } 
   ##Matrizes para guardar os resultados
   ## matriz da especie de cada individuo por ciclo
   ind.mat=matrix(nrow=J,ncol=1+ciclo/step) 
