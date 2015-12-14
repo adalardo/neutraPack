@@ -40,13 +40,17 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   {
     stop("\n\tO potencial reprodutivo (X) precisa ser multiplo do tamanho da comunidade (J). Tente novamente!\n\n")
   } 
-  if(sum(0<dist.pos & dist.pos<=ciclo)<length(dist.pos)) ## verifica se ha disturbio programado para ciclo inexistente
+  if(sum(0<=dist.pos & dist.pos<=ciclo)<length(dist.pos)) ## verifica se ha disturbio programado para ciclo inexistente
   {
     stop("\n\tA posição dos eventos de distúrbio (dist.pos) precisa ser condizente com o número de ciclos a serem rodados (ciclo). Tente novamente!\n\n")
   } 
+  if(sum(dist.pos==0 & dist.int>0)>0)
+  {
+    stop("\n\tCuidado! Foi escolhido um valor de intensidade de distúrbio (dist.int) maior que 0, mas o ciclo 0 não existe.\n\n")
+  } 
   ##Matrizes para guardar os resultados
   ## matriz da especie de cada individuo por ciclo
-  ind.mat=matrix(nrow=J,ncol=1+ciclo/step) 
+  ind.mat=matrix(nrow=J,ncol=1+ciclo/step)      
   ##Matriz de propagulos produzidos por individuo em cada ciclo
   prop.mat=matrix(nrow=J,ncol=1+ciclo/step)
   ## Matriz de probabilidade de morte de cada individuo, por ciclo
