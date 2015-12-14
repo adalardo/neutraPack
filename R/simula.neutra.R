@@ -142,7 +142,7 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   t1=proc.time()[[3]]
   cat("\n\t tempo de processamento: ", round((t1-t0)/60,2),"\n") 
   ## incluindo atributos no arquivo resulta
-  attributes(resulta)$start=list(especies=S, individuos=j, nprop=X, sd=dp, ciclos=ciclo, passos=step)
+  attributes(resulta)$start=list(especies=S, individuos=j, nprop=X, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step)
   return(resulta)
 }
 ################################################
