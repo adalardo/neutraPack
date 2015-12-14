@@ -46,7 +46,7 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   } 
   if(sum(dist.pos==0 & dist.int>0)>0)
   {
-    stop("\n\tCuidado! Foi escolhido um valor de intensidade de distúrbio (dist.int) maior que 0, mas o ciclo 0 não existe.\n\n")
+    stop("\n\tAtenção! O primeiro ciclo das simulações é o ciclo 1. Atribua 0 ao dist.pos apenas quando não desejar implementar a ocorrência de distúrbios.\n\n")
   } 
   ##Matrizes para guardar os resultados
   ## matriz da especie de cada individuo por ciclo
