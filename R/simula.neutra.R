@@ -72,30 +72,28 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   prop.mat[,1] <- X/J
   n.propag <- prop.mat[,1]
   ##Aqui comecam as simulacoes
-  for(i in 2:(1+ciclo/step))
+  for(i in 1:ciclo)
   {
       n.mortes <- 0
     ## dead based on probability   
-    for(a in 1:step) 
+    ## Sorteio dos que morrerao
+    morte=rbinom(J, 1, prob=p.death)
+    if(sum(dist.pos==i)>0)
     {
-        ## Sorteio dos que morrerao
-        morte=rbinom(J, 1, prob=p.death)
-        if(sum(dist.pos==i)>0)
-            {
-                vivos <- which(morte==0)
-                nvivos <- length(vivos)
-                if(length(dist.int)>1)
-                    {
-                        posdist <- which(dist.pos==i)
-                        ndist <- round(nvivos* dist.int[posdist])
-                    }
-                if(length(dist.int)==1)
-                    {
-                        ndist <- round(nvivos* dist.int)
-                    }
-                posmort <- sample(vivos, ndist)
-                morte[posmort] <- 1
-            }
+      vivos <- which(morte==0)
+      nvivos <- length(vivos)
+      if(length(dist.int)>1)
+      {
+        posdist <- which(dist.pos==i)
+        ndist <- round(nvivos* dist.int[posdist])
+      }
+      if(length(dist.int)==1)
+      {
+        ndist <- round(nvivos* dist.int)
+      }
+      posmort <- sample(vivos, ndist)
+      morte[posmort] <- 1
+      }
       ##Total de mortos, que e armazenado em n.dead
       D=sum(morte)
       n.mortes <- n.mortes+D
@@ -129,13 +127,16 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
         ##A matriz de probabilidades de morrer eh atualizada para os novos individuos
         p.death[nascer] <- n.propag[nascer]/X
       }
-    }
+    for(a in 1:(ciclo/step))
+      if(i==seq(step,ciclo,step)[a])
+      {
     ## A cada step ciclos os resultados sao gravados
-    ind.mat[,i] <- cod.sp
-    dead.mat[,i] <- p.death
-    prop.mat[,i] <- n.propag
-    n.dead[i] <- n.mortes
+        ind.mat[,a+1] <- cod.sp
+        dead.mat[,a+1] <- p.death
+        prop.mat[,a+1] <- n.propag
+        n.dead[a+1] <- n.mortes
     ##cat(format(Sys.time(), "%d%b%Y_%H:%M"), "\t ciclo = ", i, "\n") # para avisar a cada ciclo! desligar se estiver usando Rcloud
+      }
   }
   tempo <- seq(0,ciclo,by=step)
   colnames(ind.mat) <- tempo
