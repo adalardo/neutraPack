@@ -36,10 +36,11 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   ## Tamanho da comunidade
   J <- S*j
   ##Verifica se X e multiplo de J
-  if(abs(X/J - round(X/J)) > .Machine$double.eps^0.5) ## aqui verifica se o X/J e inteiro ou quase!
-  {
-    stop("\n\tO potencial reprodutivo (X) precisa ser multiplo do tamanho da comunidade (J). Tente novamente!\n\n")
-  } 
+  #if(abs(X/J - round(X/J)) > .Machine$double.eps^0.5) ## aqui verifica se o X/J e inteiro ou quase!
+  #{
+    #stop("\n\tO potencial reprodutivo (X) precisa ser multiplo do tamanho da comunidade (J). Tente novamente!\n\n")
+  #} 
+  
   if(sum(0<=dist.pos & dist.pos<=ciclo)<length(dist.pos)) ## verifica se ha disturbio programado para ciclo inexistente
   {
     stop("\n\tA posição dos eventos de distúrbio (dist.pos) precisa ser condizente com o número de ciclos a serem rodados (ciclo). Tente novamente!\n\n")
@@ -69,7 +70,7 @@ simula.neutra.step=function(S= 100, j=10, X=1000, dp=0.1, dist.pos=NULL, dist.in
   p.death <- dead.mat[,1]
   ##O esforco reprodutivo inicial e deduzido da esperanca de tempo de vida da geometrica E[t]=J
   ## o que portanto resulta em X/J propagulos produzidos a cada ciclo, por todos
-  prop.mat[,1] <- X/J
+  prop.mat[,1] <- round(X/J)
   n.propag <- prop.mat[,1]
   ##Aqui comecam as simulacoes
   for(i in 1:ciclo)
