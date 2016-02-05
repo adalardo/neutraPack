@@ -157,7 +157,7 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
   resulta=list(tempo=tempo,sp.list=ind.mat,sementes=prop.mat,prob.morte=dead.mat,n.mortes=n.dead)
   t1=proc.time()[[3]] ### Marca o termino da contagem de tempo de processamento da funcao
   cat("\n\t tempo de processamento: ", round((t1-t0)/60,2),"\n") ### Mostra o tempo de processamento no console
-  attributes(resulta)$start=list(especies=S, individuos=j, nprop=X, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
+  attributes(resulta)$start=list(especies=S, individuos=j, nprop=xi0, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
   return(resulta) ### Retorna o objeto resulta
 }
 #############################################################################
