@@ -177,3 +177,4 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
 
 
 #### em vez de usar a rnormt, usar o pacote truncnorm
+require(truncnorm)
