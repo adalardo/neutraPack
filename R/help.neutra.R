@@ -160,11 +160,9 @@ simula_output<-function(lista_simulacoes)
     vari_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=var)
     assim_geral <- skewness(prop[,meia_vida])
     assim_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=skewness)
-    curt_geral <- kurtosis(prop[,meia_vida],method="excess")
-    curt_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=kurtosis)
-    curt_geral_corrigida <- assim_geral^2 - curt_geral
-    curt_sp_corrigida <- assim_sp^2-curt_sp
-    resultado <- matrix(data=c(tam_com,abund,med_geral,med_sp,vari_geral,vari_sp,assim_geral,assim_sp,curt_geral,curt_sp,curt_geral_corrigida,curt_sp_corrigida),ncol=6,dimnames=list(c("geral",paste("sp",(unique(sp[,meia_vida])[order(unique(sp[,meia_vida]))]),sep="")),c("abundancia","media","variancia","assimetria","curtose","curtose_corrigida")))
+    exc_curt_geral <- kurtosis(prop[,meia_vida])-3
+    exc_curt_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=kurtosis)-3
+    resultado <- matrix(data=c(tam_com,abund,med_geral,med_sp,vari_geral,vari_sp,assim_geral,assim_sp,exc_curt_geral,exc_curt_sp),ncol=5,dimnames=list(c("geral",paste("sp",(unique(sp[,meia_vida])[order(unique(sp[,meia_vida]))]),sep="")),c("abundancia","media","variancia","assimetria","excesso_curtose")))
     attributes(resultado)$start<-attributes(x[[i]])
     resultado_lista[[i]]<-resultado
   }
