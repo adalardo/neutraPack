@@ -5,6 +5,8 @@
 ##############################################################################
 ############################ Listagem das versoes ############################
 ##############################################################################
+# 6. Versao modificada por Luisa Novara para incluir spp com diferentes estrategias de vida iniciais (maio 2016)
+# 5. Versao modificada por Luisa Novara para incluir retorno do numero de mortes cumulativo (maio 2016)
 # 4. Versao modificada por Luisa Novara e Alexandre Adalardo (fevereiro 2016)
 # 3. Disturbio implementado por Alexandre Adalardo e Luisa Novara (novembro 2015) 
 # 2. Versao modificada por Luisa Novara (2014)
@@ -12,6 +14,7 @@
 ##############################################################################
 ########################## Detalhamento das versoes ##########################
 ##############################################################################
+# 6. Troca a forma do argumento xi0 de um valor para um vetor de tamanho J, com os valores das estrategias iniciais de cada individuo da comunidade.
 # 4. Troca o argumento X por xi0, para que X (que eh dado por xi0*J) seja inteiro
 # 2. Troca o antigo argumento cv (coeficiente de variacao) pelo dp (desvio padrao) da distribuicao normal da herdabilidade de xi. Isso permite que a herdabilidade permaneça constante e evita o erro de gerar herdabilidade maior quando os valores de xi sao mais baixos (i.e., evita que os valores de xi da populacao fiquem "presos" em valores mais baixos e isso mascare os reais resultados das simulacoes)
 ##############################################################################
@@ -19,7 +22,7 @@
 ##############################################################################
 #      S =  número de especies da comunidade
 #      j = número inicial de individuos por especie
-#      xi0 =  número de propagulos que o individuo i produz por ciclo no inicio da simulacao
+#      xi0 =  vetor com o número de propagulos que cada individuo produz por ciclo no inicio da simulacao. Para determinar as estrategias das spp (sem variacao intraespecifica) a partir dos valores minimo e maximo da comunidade definidos pelo usuario, fazer: rep(seq(1,10,length.out = S),each=j).
 #      dp =  desvio padrao da distribuicao normal da herdabilidade de xi
 #      dist.pos = vetor com a identificacao dos ciclos em que ocorrem eventos de disturbio
 #      dist.int = vetor com a intensidade de cada evento de disturbio, se ha soh um valor este eh aplicado para todos
@@ -37,14 +40,15 @@
 ##############################################################################
 ############################## Inicio da funcao ##############################
 ##############################################################################
-simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100)
-  {
+simula.neutra.step=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100)
+{
+  #cat("Inicio simulacao... Ciclos: ")
   t0=proc.time()[[3]] ### Marca o inicio da contagem de tempo de processamento da funcao
   #############################################################################
   ########################### Argumentos deduzidos ############################
   #############################################################################
   J <- S*j ### Calcula o tamanho da comunidade (J)
-  X <- xi0*J ### Calcula o numero total de propagulos produzidos por um individuo (X)
+  X <- min(xi0)*J ### Calcula o numero total de propagulos produzidos por um individuo (X).
   #############################################################################
   ############################### Verificacoes ################################
   #############################################################################
@@ -62,9 +66,10 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
   ind.mat=matrix(nrow=J,ncol=1+ciclo/step) ### Gera matriz da identidade (especie) de cada individuo por ciclo    
   prop.mat=matrix(nrow=J,ncol=1+ciclo/step) ### Gera matriz de propagulos produzidos por individuo em cada ciclo
   dead.mat=matrix(nrow=J,ncol=1+ciclo/step) ### Gera matriz de probabilidade de morte de cada individuo, por ciclo
-  ### Vetor com numero de mortos por ciclo
-  n.dead <- c()
-  n.dead[1] <- 0
+  ### Vetor com numero de mortes cumulativo ate determinado ciclo
+  n.dead <- 0
+  n.dead.vetor<-c()
+  n.dead.vetor[1] <- 0
   #############################################################################
   ############################# Condicoes iniciais ############################
   #############################################################################
@@ -75,8 +80,9 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
   dead.mat[,1] <- 1/J
   p.death <- dead.mat[,1] ### Transfere informacao para vetor temporario que se atualiza a cada ciclo, depois de ser copiado para uma coluna da matriz
   ### Guarda o numero de propagulos produzidos por ciclo de cada individuo
-  prop.mat[,1] <- xi0
-  n.propag <- prop.mat[,1] ### Transfere informacao para vetor temporario que se atualiza a cada ciclo, depois de ser copiado para uma coluna da matriz
+  prop.mat[,1] <- xi0 ### Transfere informacao para vetor temporario que se atualiza a cada ciclo, depois de ser copiado para uma coluna da matriz
+  n.propag <- prop.mat[,1]
+  prop.mat[,1]<-round(prop.mat[,1]) ### Arredonda valor de numero de propagulos produzidos por ciclo na matriz de resultados para que se retorne como saida da funcao o "fenotipo" dos individuos
   #############################################################################
   ############ Contador para salvar resultados a cada step ciclos #############
   #############################################################################
@@ -85,67 +91,68 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
   ############################## Inicio do ciclo ##############################
   #############################################################################
   for(i in 1:ciclo)
-    {
-    #n.mortes <- 0
+  {
     morte=rbinom(J, 1, prob=p.death) ### Sorteio dos individuos que morrerao
     #########################################################################
     ######################### Inicio dos disturbios #########################
     #########################################################################
     if(sum(dist.pos==i)>0) ### Identifica se ocorre um evento de disturbio no ciclo atual
-      {
+    {
       vivos <- which(morte==0) ### Identifica individuos sobreviventes
       nvivos <- length(vivos) ### Conta numero de individuos sobreviventes
       if(length(dist.int)>1) ### Identifica se os eventos apresentam diferentes intensidades
-        {
+      {
         posdist <- which(dist.pos==i) ### Guarda qual o numero do evento do disturbio
         ndist <- round(nvivos* dist.int[posdist]) ### Calcula o numero de individuos mortos com o evento
-        }
+      }
       if(length(dist.int)==1) ### Identifica se os eventos apresentam a mesma intensidade
-        {
+      {
         ndist <- round(nvivos* dist.int) ### Calcula o numero de individuos mortos com o evento
-        }
+      }
       posmort <- sample(vivos, ndist) ### Sorteia quais individuos serao mortos no evento de disturbio
       morte[posmort] <- 1 ### Marca os individuos que morreram como mortos (numero 1 no vetor 0/1)
-      }
+    }
     #########################################################################
     ######################### Termino dos disturbios ########################
     #########################################################################
-    #D=sum(morte)
-    #n.mortes <- n.mortes+D
     n.mortes <- sum(morte) ### Grava o numero total de mortes no ciclo
+    n.dead <- n.dead + n.mortes ### Atualiza n.dead com numero de mortes acumulado ate entao mais o numero de mortes do ciclo atual
     #########################################################################
     ######################## Substituicao de valores ########################
     #########################################################################
     if(n.mortes>0) ### Identifica se houve mortes no ciclo
-      {
+    {
       seed.bank <- rep(1:J,round(n.propag)) ### Banco de propagulos: cada propagulo tem o codigo numerico do individuo. Como o fenotipo n.propag pode ter valores nao inteiros, arredondamos.
       nascer= which(morte==1) ### Armazena indices dos individuos que morreram
       mami=sample(seed.bank, n.mortes) ### Sorteia os propagulos que irao repor os mortos
       papi <- c() ### Cria vetor para armazenar o fenotipo do pai
       for(w in 1:n.mortes) ### Cria loop para sortear o pai entre os individuos da especie de cada propagulo-mae sorteado
-        {
+      {
         papi[w] <- sample(n.propag[ cod.sp==cod.sp[mami[w]] ],1)
-        }
+      }
       medias.prop=(n.propag[mami]+papi)/2 ### Calcula o valor esperado de propagulos produzidos por ciclo dos filhotes, representado pela media do numero medio de propagulos produzidos pelos parentais
       cod.sp[nascer]<-cod.sp[mami] ### Substitui codigos das especies dos mortos pelos codigos dos individuos novos
       n.propag[nascer] <- sapply(1,rtruncnorm,a=1, b=X , mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X
       p.death[nascer] <- n.propag[nascer]/X ### Atualiza a matriz de probabilidades de morrer
-      }
+    }
     #########################################################################
     ####################### Salvamento dos resultados #######################
     #########################################################################
     if(sum(i==seq(step,ciclo,step))==1) ### Verifica se o ciclo atual eh um dos que devem ser salvos
-      {
+    {
       ind.mat[,sc] <- cod.sp ### Guarda na posicao sc a identificacao nova dos individuos
       dead.mat[,sc] <- p.death ### Guarda na posicao sc a probabilidade de morte nova dos individuos
       prop.mat[,sc] <- round(n.propag) ### Guarda na posicao sc o numero de propagulos produzidos por ciclo novo dos individuos
-      n.dead[sc] <- n.mortes ### Guarda na posicao sc o numero de mortes do ciclo atual
+      n.dead.vetor[sc] <- n.dead ### Guarda na posicao sc o numero de mortes acumulado ate o ciclo atual
       sc <- sc+1 ### Atualiza o contador que salva os resultados para o proximo ciclo a ser rodado
-    ##cat(format(Sys.time(), "%d%b%Y_%H:%M"), "\t ciclo = ", i, "\n") # para avisar a cada ciclo! desligar se estiver usando Rcloud
-      } 
+      ##cat(format(Sys.time(), "%d%b%Y_%H:%M"), "\t ciclo = ", i, "\n") # para avisar a cada ciclo! desligar se estiver usando Rcloud
+      #cat(i," ")
+    } 
   }
   #############################################################################
   ############################## Termino do ciclo #############################
+  #############################################################################
+  #cat("...Termino simulacao\n")
   #############################################################################
   ########################### Organizacao do output ###########################
   #############################################################################
@@ -153,10 +160,10 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
   colnames(ind.mat) <- tempo ### Nomeia colunas da matriz ind.mat
   colnames(dead.mat) <- tempo ### Nomeia colunas da matriz dead.mat
   colnames(prop.mat) <- tempo ### Nomeia colunas da matriz prop.mat
-  names(n.dead) <- tempo ### Nomeia os elementos do vetor
-  resulta=list(tempo=tempo,sp.list=ind.mat,sementes=prop.mat,prob.morte=dead.mat,n.mortes=n.dead)
+  names(n.dead.vetor) <- tempo ### Nomeia os elementos do vetor
+  resulta=list(tempo=tempo,sp.list=ind.mat,sementes=prop.mat,prob.morte=dead.mat,n.mortes.cumulativo=n.dead.vetor)
   t1=proc.time()[[3]] ### Marca o termino da contagem de tempo de processamento da funcao
-  cat("\n\t tempo de processamento: ", round((t1-t0)/60,2),"\n") ### Mostra o tempo de processamento no console
+  cat("Tempo de processamento: ", round((t1-t0)/60,2),"min\n") ### Mostra o tempo de processamento no console
   attributes(resulta)$start=list(especies=S, individuos=j, nprop=xi0, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
   return(resulta) ### Retorna o objeto resulta
 }
@@ -178,3 +185,4 @@ simula.neutra.step=function(S= 100, j=10, xi0=10, dp=0.1, dist.pos=NULL, dist.in
 
 #### em vez de usar a rnormt, usar o pacote truncnorm
 require(truncnorm)
+
