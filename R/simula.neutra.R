@@ -37,7 +37,7 @@ require(truncnorm)
 ##############################################################################
 simula.neutra=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), X=10000, pi0=NULL, dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100, trade.off=T, prop.neutro=F)
 {
-  #cat("Inicio simulacao... Ciclos: ")
+  cat("Inicio simulacao... Ciclos: ")
   t0=proc.time()[[3]] ### Marca o inicio da contagem de tempo de processamento da funcao
   #############################################################################
   ########################### Argumentos deduzidos ############################
@@ -180,13 +180,13 @@ simula.neutra=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), 
       n.dead.vetor[sc] <- n.dead ### Guarda na posicao sc o numero de mortes acumulado ate o ciclo atual
       sc <- sc+1 ### Atualiza o contador que salva os resultados para o proximo ciclo a ser rodado
       ##cat(format(Sys.time(), "%d%b%Y_%H:%M"), "\t ciclo = ", i, "\n") # para avisar a cada ciclo! desligar se estiver usando Rcloud
-      #cat(i," ")
+      cat(i," ")
     } 
   }
   #############################################################################
   ############################## Termino do ciclo #############################
   #############################################################################
-  #cat("...Termino simulacao\n")
+  cat("...Termino simulacao\n")
   #############################################################################
   ########################### Organizacao do output ###########################
   #############################################################################
@@ -232,8 +232,8 @@ simula.neutra=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), 
 ##############################################################################
 simula.neutra.trade=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), X=10000, dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100)
 {
-  #cat("Inicio simulacao... Ciclos: ")
   t0=proc.time()[[3]] ### Marca o inicio da contagem de tempo de processamento da funcao
+  cat("Inicio simulacao... Ciclos: ")
   #############################################################################
   ########################### Argumentos deduzidos ############################
   #############################################################################
@@ -349,13 +349,13 @@ simula.neutra.trade=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),eac
       n.dead.vetor[sc] <- n.dead ### Guarda na posicao sc o numero de mortes acumulado ate o ciclo atual
       sc <- sc+1 ### Atualiza o contador que salva os resultados para o proximo ciclo a ser rodado
       ##cat(format(Sys.time(), "%d%b%Y_%H:%M"), "\t ciclo = ", i, "\n") # para avisar a cada ciclo! desligar se estiver usando Rcloud
-      #cat(i," ")
+      cat(i," ")
     } 
   }
   #############################################################################
   ############################## Termino do ciclo #############################
   #############################################################################
-  #cat("...Termino simulacao\n")
+  cat("...Termino simulacao\n")
   #############################################################################
   ########################### Organizacao do output ###########################
   #############################################################################
