@@ -37,8 +37,8 @@ require(truncnorm)
 ##############################################################################
 simula.neutra=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), X=10000, pi0=NULL, dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100, trade.off=T, prop.neutro=F)
 {
-  cat("Inicio simulacao... Ciclos: ")
   t0=proc.time()[[3]] ### Marca o inicio da contagem de tempo de processamento da funcao
+  cat("Inicio simulacao... Ciclos: ")
   #############################################################################
   ########################### Argumentos deduzidos ############################
   #############################################################################
@@ -158,7 +158,7 @@ simula.neutra=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), 
       }
       medias.prop=(n.propag[mami]+n.propag[papi])/2 ### Calcula o valor esperado de propagulos produzidos por ciclo dos filhotes, representado pela media do numero medio de propagulos produzidos pelos parentais
       cod.sp[nascer]<-cod.sp[mami] ### Substitui codigos das especies dos mortos pelos codigos dos individuos novos
-      n.propag[nascer] <- sapply(1,rtruncnorm,a=1, b=X , mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X e cuja media eh a media dos pais
+      n.propag[nascer] <- sapply(1,rtruncnorm,a=(1-0.000001), b=(X+0.000001), mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X e cuja media eh a media dos pais
       if (trade.off==T)
       {
         p.death[nascer] <- n.propag[nascer]/X ### Calcula a probabilidade de morte dos individuos novos a partir do trade-off
@@ -335,8 +335,8 @@ simula.neutra.trade=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),eac
       }
       medias.prop=(n.propag[mami]+n.propag[papi])/2 ### Calcula o valor esperado de propagulos produzidos por ciclo dos filhotes, representado pela media do numero medio de propagulos produzidos pelos parentais
       cod.sp[nascer]<-cod.sp[mami] ### Substitui codigos das especies dos mortos pelos codigos dos individuos novos
-      n.propag[nascer] <- sapply(1,rtruncnorm,a=1, b=X , mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X
-      p.death[nascer] <- n.propag[nascer]/X ### Calcula a probabilidade de morte dos individuos novos a partir do trade-off
+      n.propag[nascer] <- sapply(1,rtruncnorm,a=(1-0.000001), b=(X+0.000001), mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X
+      p.death[nascer] <- n.propag[nascer]/(X+0.000001) ### Calcula a probabilidade de morte dos individuos novos a partir do trade-off
     }
     #########################################################################
     ####################### Salvamento dos resultados #######################
@@ -364,10 +364,15 @@ simula.neutra.trade=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),eac
   colnames(dead.mat) <- tempo ### Nomeia colunas da matriz dead.mat
   colnames(prop.mat) <- tempo ### Nomeia colunas da matriz prop.mat
   names(n.dead.vetor) <- tempo ### Nomeia os elementos do vetor
-  resulta=list(tempo=tempo,sp.list=ind.mat,sementes=prop.mat,prob.morte=dead.mat,n.mortes.cumulativo=n.dead.vetor)
+  resulta=list(
+    tempo=tempo,
+    sp.list=ind.mat,
+    sementes=prop.mat,
+    prob.morte=dead.mat,
+    n.mortes.cumulativo=n.dead.vetor)
   t1=proc.time()[[3]] ### Marca o termino da contagem de tempo de processamento da funcao
   cat("Tempo de processamento: ", round((t1-t0)/60,2),"min\n") ### Mostra o tempo de processamento no console
-  attributes(resulta)$start=list(especies=S, individuos=j, nprop=xi0, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
+  attributes(resulta)$start=list(especies=S, individuos=j, nprop=xi0, nprop_max=X, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
   return(resulta) ### Retorna o objeto resulta
 }
 #############################################################################
@@ -406,8 +411,8 @@ simula.neutra.trade=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),eac
 ##############################################################################
 simula.neutra.dd=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), X=10000, pi0=rep(seq(0.01,0.01,length.out = S),each=j), dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100)
 {
-  #cat("Inicio simulacao... Ciclos: ")
   t0=proc.time()[[3]] ### Marca o inicio da contagem de tempo de processamento da funcao
+  #cat("Inicio simulacao... Ciclos: ")
   #############################################################################
   ########################### Argumentos deduzidos ############################
   #############################################################################
@@ -509,7 +514,7 @@ simula.neutra.dd=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j
       }
       medias.prop=(n.propag[mami]+n.propag[papi])/2 ### Calcula o valor esperado de propagulos produzidos por ciclo dos filhotes, representado pela media do numero medio de propagulos produzidos pelos parentais
       cod.sp[nascer]<-cod.sp[mami] ### Substitui codigos das especies dos mortos pelos codigos dos individuos novos
-      n.propag[nascer] <- sapply(1,rtruncnorm,a=1, b=X , mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X e cuja media eh a media dos pais
+      n.propag[nascer] <- sapply(1,rtruncnorm,a=(1-0.000001), b=(X+0.000001), mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X e cuja media eh a media dos pais
       medias.p.death <- (p.death[mami]+p.death[papi])/2 ### Calcula a media da probabilidade de morte dos pais
       p.death[nascer] <- sapply(1,rtruncnorm,a=1/200000, b=1, mean=medias.p.death,sd=dp) ### Sorteia a probabilidade de morte dos novos individuos de uma distribuicao normal discretizada e truncada entre um numero muito pequeno e 1 e cuja media eh a media dos pais
     }
@@ -584,8 +589,8 @@ simula.neutra.dd=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j
 ##############################################################################
 simula.neutra.cn=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), X=10000, pi0=rep(seq(0.01,0.01,length.out = S),each=j), dp=0.1, dist.pos=NULL, dist.int=NULL, ciclo=1e6, step=100)
 {
-  #cat("Inicio simulacao... Ciclos: ")
   t0=proc.time()[[3]] ### Marca o inicio da contagem de tempo de processamento da funcao
+  #cat("Inicio simulacao... Ciclos: ")
   #############################################################################
   ########################### Argumentos deduzidos ############################
   #############################################################################
@@ -687,7 +692,7 @@ simula.neutra.cn=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j
       }
       medias.prop=(n.propag[mami]+n.propag[papi])/2 ### Calcula o valor esperado de propagulos produzidos por ciclo dos filhotes, representado pela media do numero medio de propagulos produzidos pelos parentais
       cod.sp[nascer]<-cod.sp[mami] ### Substitui codigos das especies dos mortos pelos codigos dos individuos novos
-      n.propag[nascer] <- sapply(1,rtruncnorm,a=1, b=X , mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X
+      n.propag[nascer] <- sapply(1,rtruncnorm,a=(1-0.000001), b=(X+0.000001), mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X e cuja media eh a media dos pais
       medias.p.death <- (p.death[mami]+p.death[papi])/2 ### Calcula a media da probabilidade de morte dos pais
       p.death[nascer] <- sapply(1,rtruncnorm,a=1/200000, b=1, mean=medias.p.death,sd=dp) ### Sorteia a probabilidade de morte dos novos individuos de uma distribuicao normal discretizada e truncada entre um numero muito pequeno e 1 e cuja media eh a media dos pais
     }
@@ -720,7 +725,7 @@ simula.neutra.cn=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j
   resulta=list(tempo=tempo,sp.list=ind.mat,sementes=prop.mat,prob.morte=dead.mat,n.mortes.cumulativo=n.dead.vetor)
   t1=proc.time()[[3]] ### Marca o termino da contagem de tempo de processamento da funcao
   cat("Tempo de processamento: ", round((t1-t0)/60,2),"min\n") ### Mostra o tempo de processamento no console
-  attributes(resulta)$start=list(especies=S, individuos=j, nprop=xi0, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
+  attributes(resulta)$start=list(especies=S, individuos=j, nprop=xi0, nprop_max=X, prob_mort=pi0, sd=dp, posicao_disturbios=dist.pos, intensidade_disturbios=dist.int, ciclos=ciclo, passos=step) ### Inclui atributos no objeto resulta
   return(resulta) ### Retorna o objeto resulta
 }
 #############################################################################

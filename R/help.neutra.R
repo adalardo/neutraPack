@@ -5,16 +5,6 @@
 ###### OBSERVACAO 1: AQUI, simulacao = RESULTADO (LISTA FINAL) DE DETERMINADA SIMULACAO COM simula.neutra.step
 
 ####################################################################
-##### Conta especie do arquivo de saida da simulacao + Grafico #####
-########################## AAO junho 2010 ##########################
-####################################################################
-
-conta.sp=function(x)
-{
-  length(unique(x))
-}
-
-####################################################################
 ########### Grafico da variacao na SAD ao longo do tempo ###########
 ########################## AAO junho 2010 ##########################
 ####################################################################
@@ -140,30 +130,35 @@ simula_input<-function(input_hipercubo,Jm=5000,ciclos=100000,steps=100){
 
 require(PerformanceAnalytics)
 
-simula_output<-function(lista_simulacoes)
+simula_output<-function(lista_simulacoes,nger=2000)
 {
   x<-lista_simulacoes
   resultado<-matrix()
   resultado_lista<-list()
   for (i in 1:length(x))
   {
-    riq_temp <- apply(x[[i]]$sp.list,2,conta.sp) 
-    meia_riq<-riq_temp[1]/2
-    meia_vida<-max(which(abs(riq_temp-meia_riq)==min(abs(riq_temp-meia_riq))))
-    abund<-as.vector(table(x[[i]]$sp.list[,meia_vida]))
-    tam_com<-sum(abund)
+    tam_com <- attributes(x[[i]])$start[[1]]*attributes(x[[i]])$start[[2]]
+    mortes_acumuladas <- x[[i]]$n.mortes.cumulativo
+    n.mortes_prox_nger <- mortes_acumuladas - (nger*tam_com)
+    ngeracao <- which(abs(n.mortes_prox_nger)==min(abs(n.mortes_prox_nger)))
     prop <- as.matrix(x[[i]]$sementes)
     sp <- as.matrix(x[[i]]$sp.list)
-    med_geral <- mean(prop[,meia_vida])
-    med_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=mean)
-    vari_geral <- var(prop[,meia_vida])
-    vari_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=var)
-    assim_geral <- skewness(prop[,meia_vida])
-    assim_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=skewness)
-    exc_curt_geral <- kurtosis(prop[,meia_vida])-3
-    exc_curt_sp <- tapply(X=prop[,meia_vida],INDEX=sp[,meia_vida],FUN=kurtosis)-3
-    resultado <- matrix(data=c(tam_com,abund,med_geral,med_sp,vari_geral,vari_sp,assim_geral,assim_sp,exc_curt_geral,exc_curt_sp),ncol=5,dimnames=list(c("geral",paste("sp",(unique(sp[,meia_vida])[order(unique(sp[,meia_vida]))]),sep="")),c("abundancia","media","variancia","assimetria","excesso_curtose")))
-    attributes(resultado)$start<-attributes(x[[i]])
+    abund<-as.vector(table(sp[,ngeracao]))
+    riq.fin <- length(unique(sp[,ngeracao]))
+    riq.inic <- length(unique(sp[,1]))
+    perda.sp <- (riq.fin - riq.inic)/riq.inic
+    med_geral <- mean(prop[,ngeracao])
+    med_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=mean)
+    moda_geral <- prop[,ngeracao][max(table(prop[,ngeracao]))]
+    moda_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=function(coisa){return(coisa[max(table(coisa))])})
+    vari_geral <- var(prop[,ngeracao])
+    vari_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=var)
+    assim_geral <- skewness(prop[,ngeracao])
+    assim_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=skewness)
+    exc_curt_geral <- kurtosis(prop[,ngeracao])-3
+    exc_curt_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=kurtosis)-3
+    resultado <- matrix(data=c(tam_com,abund,med_geral,med_sp,moda_geral,moda_sp,vari_geral,vari_sp,assim_geral,assim_sp,exc_curt_geral,exc_curt_sp),ncol=6,dimnames=list(c("geral",paste("sp",(unique(sp[,ngeracao])[order(unique(sp[,ngeracao]))]),sep="")),c("abundancia","media","moda","variancia","assimetria","excesso_curtose")))
+    attributes(resultado)$start<-c(attributes(x[[i]]),perda.especies=perda.sp)
     resultado_lista[[i]]<-resultado
   }
   return(resultado_lista)
