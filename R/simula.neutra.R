@@ -141,21 +141,25 @@ simula.neutra=function(S= 100, j=10, xi0=rep(seq(10,10,length.out = S),each=j), 
     if(n.mortes>0) ### Identifica se houve mortes no ciclo
     {
       cod.ind<-1:J
-      seed.bank <- rep(cod.ind,round(n.propag)) ### Banco de propagulos: cada propagulo tem o codigo numerico do individuo. Como o fenotipo n.propag pode ter valores nao inteiros, arredondamos.
       nascer= which(morte==1) ### Armazena indices dos individuos que morreram
       if(prop.neutro==F)
       {
-        mami=sample(seed.bank, n.mortes) ### Sorteia os propagulos que irao repor os mortos
+        mami=sample(x=cod.ind, size=n.mortes, prob=n.propag, replace=T) ### Sorteia os propagulos que irao repor os mortos
       }
       if(prop.neutro==T)
       {
         mami=sample(cod.ind, n.mortes) ### Sorteia os individuos adultos que irao repor os mortos
       }
-      papi <- c() ### Cria vetor para armazenar o fenotipo do pai
-      for(w in 1:n.mortes) ### Cria loop para sortear o pai entre os individuos da especie de cada propagulo-mae sorteado
+      papi<-c()
+      tpapi = table(cod.sp[mami])
+      codpapi = names(tpapi)
+      npapi = as.numeric(tpapi)
+      for(pp in 1:length(codpapi))
       {
-        papi[w] <- sample(cod.ind[ cod.sp==cod.sp[mami[w]] ],1)
+        npapis <- sample(cod.ind[ cod.sp==codpapi[pp] ] , npapi[pp], replace=T)
+        papi <- c(papi, npapis)
       }
+      papi<-papi[order(order(cod.sp[mami]),papi)]
       medias.prop=(n.propag[mami]+n.propag[papi])/2 ### Calcula o valor esperado de propagulos produzidos por ciclo dos filhotes, representado pela media do numero medio de propagulos produzidos pelos parentais
       cod.sp[nascer]<-cod.sp[mami] ### Substitui codigos das especies dos mortos pelos codigos dos individuos novos
       n.propag[nascer] <- sapply(1,rtruncnorm,a=(1-0.000001), b=(X+0.000001), mean= medias.prop,sd=dp) ### Sorteia o numero de propagulos produzidos por ciclo pelos novos individuos de uma distribuicao normal discretizada e truncada entre 1 e X e cuja media eh a media dos pais

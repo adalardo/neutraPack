@@ -86,6 +86,7 @@ fert.t <- function(cod.sp,n.propag,fun=mean)
   sp.level<-factor(cod.sp,levels=cod.sp)
   t.a<-function(x){tapply(n.propag[,x],factor(cod.sp[,x],levels=especie),fun)}
   res<-sapply(1:ncol(n.propag), t.a)
+  #names(res)<-colnames(n.propag)
   colnames(res) <- colnames(n.propag)
   rownames(res) <- paste("sp",especie, sep="")
   return(res)
@@ -130,7 +131,7 @@ simula_input<-function(input_hipercubo,Jm=5000,ciclos=100000,steps=100){
 
 require(PerformanceAnalytics)
 
-simula_output<-function(lista_simulacoes,nger=2000)
+simula_output<-function(lista_simulacoes,nger=5000)
 {
   x<-lista_simulacoes
   resultado<-matrix()
@@ -146,19 +147,19 @@ simula_output<-function(lista_simulacoes,nger=2000)
     abund<-as.vector(table(sp[,ngeracao]))
     riq.fin <- length(unique(sp[,ngeracao]))
     riq.inic <- length(unique(sp[,1]))
-    perda.sp <- (riq.fin - riq.inic)/riq.inic
     med_geral <- mean(prop[,ngeracao])
     med_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=mean)
+    median_geral <- median(prop[,ngeracao])
+    median_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=median)
     moda_geral <- prop[,ngeracao][max(table(prop[,ngeracao]))]
     moda_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=function(coisa){return(coisa[max(table(coisa))])})
     vari_geral <- var(prop[,ngeracao])
     vari_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=var)
     assim_geral <- skewness(prop[,ngeracao])
     assim_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=skewness)
-    exc_curt_geral <- kurtosis(prop[,ngeracao])-3
-    exc_curt_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=kurtosis)-3
-    resultado <- matrix(data=c(tam_com,abund,med_geral,med_sp,moda_geral,moda_sp,vari_geral,vari_sp,assim_geral,assim_sp,exc_curt_geral,exc_curt_sp),ncol=6,dimnames=list(c("geral",paste("sp",(unique(sp[,ngeracao])[order(unique(sp[,ngeracao]))]),sep="")),c("abundancia","media","moda","variancia","assimetria","excesso_curtose")))
-    attributes(resultado)$start<-c(attributes(x[[i]]),perda.especies=perda.sp)
+    exc_curt_geral <- kurtosis(prop[,ngeracao])
+    exc_curt_sp <- tapply(X=prop[,ngeracao],INDEX=sp[,ngeracao],FUN=kurtosis)
+    resultado <- matrix(data=c(riq.inic,rep(NA,riq.fin),riq.fin,rep(NA,riq.fin),tam_com,abund,med_geral,med_sp,median_geral,median_sp,moda_geral,moda_sp,vari_geral,vari_sp,assim_geral,assim_sp,exc_curt_geral,exc_curt_sp),ncol=9,dimnames=list(c("geral",paste("sp",(unique(sp[,ngeracao])[order(unique(sp[,ngeracao]))]),sep="")),c("riq_inic","riq_fin","abundancia","media","mediana","moda","variancia","assimetria","excesso_curtose")))
     resultado_lista[[i]]<-resultado
   }
   return(resultado_lista)
