@@ -7,3 +7,4 @@ Author: Alexandre Adalardo, Luisa Novara and Paulo Inacio Prado
 Maintainer: <luisanovara@gmail.com>
 Description: Random simulation 
 License: What license is it under?
+Imports: truncnorm
